@@ -13,6 +13,7 @@ To run this project, you need to have Python 3 installed along with the followin
 
 - PyTorch
 - OpenCV
+- Pandas
 - NumPy
 - Matplotlib
 - Other dependencies listed in `requirements.txt`
