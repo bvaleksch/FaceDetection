@@ -3,3 +3,6 @@ rich==14.0.0
 opencv-python==4.11.0.86
 pandas==2.2.3
 scikit-learn==1.6.1
+numpy==2.2.4
+torchvision==0.21.0
+pillow==11.1.0

@@ -23,3 +23,15 @@ To run this project, you need to have Python 3 installed along with the followin
    ```bash
    git clone https://github.com/bvaleksch/FaceDetection.git
    cd FaceDetection
+   pip install -r requirements.txt
+   ```
+
+## Train
+```bash
+python3 ./src/train.py
+```
+
+# Test
+```bash
+python3 ./src/test.py
+```
