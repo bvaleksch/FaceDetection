@@ -1,9 +1,10 @@
 import torch
 import torchvision
+import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from rich.progress import Progress, BarColumn, TextColumn, TaskProgressColumn, TimeRemainingColumn, TimeElapsedColumn 
 from dataset import create_datasets
-from model import MyModel
+from model import *
 
 """
 The train_epoch and evaluate_epoch functions are poorly implemented due to code duplication.
@@ -75,9 +76,9 @@ def evaluate_epoch(epoch):
     return err
 
 dataset_folder = "/Datasets/CelebA/"
-model_name = "second_model.pth"
+model_name = "first_model.pth"
 model_save_path = f"./models/{model_name}"
-lr = 1e-4
+lr = 1e-3
 epochs = 50
 batch_size = 64
 image_size = (1, 128, 128)
@@ -94,4 +95,15 @@ for epoch in range(epochs):
     test_error.append(evaluate_epoch(epoch + 1))
 
 torch.save(model.state_dict(), model_save_path)
+
+plt.plot(range(1, epochs + 1), train_error, label='Training Error', marker='o', color='blue')
+plt.plot(range(1, epochs + 1), test_error, label='Test Error', marker='o', color='orange')
+plt.title('Training and Test Error Over Epochs')
+plt.xlabel('Epochs')
+plt.ylabel('Error')
+plt.grid(True)
+plt.legend()
+plt.show()
+
+
 
