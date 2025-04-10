@@ -31,7 +31,7 @@ To run this project, you need to have Python 3 installed along with the followin
 python3 ./src/train.py
 ```
 
-# Test
+## Test
 ```bash
 python3 ./src/test.py
 ```

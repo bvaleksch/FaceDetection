@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from tkinter import Tk, Button, filedialog, Canvas
 from PIL import Image, ImageTk
-from model import MyModel
+from model import *
 
 def resize_with_padding(image, target_size=(128, 128)):
     h, w = image.shape[:2]
@@ -93,8 +93,8 @@ def start_video():
 video_stream = True #Photo mode is not implemented (in progress)
 image_size = (1, 128, 128)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = MyModel(image_size).to(device)
-model.load_state_dict(torch.load("./models/fourth2_model.pth"))
+model = MyModel2(image_size).to(device)
+model.load_state_dict(torch.load("./models/second_model.pth", map_location=device))
 model.eval()
 
 if not video_stream:

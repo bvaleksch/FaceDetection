@@ -13,6 +13,15 @@ It is necessary to create a single common function to avoid copy-pasting code.
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+def get_n_params(model):
+    pp=0
+    for p in list(model.parameters()):
+        nn=1
+        for s in list(p.size()):
+            nn = nn*s
+        pp += nn
+    return pp
+
 def train_epoch(epoch):
     model.train()
     progress = Progress(
@@ -75,19 +84,22 @@ def evaluate_epoch(epoch):
 
     return err
 
+night = True
 dataset_folder = "/Datasets/CelebA/"
-model_name = "first_model.pth"
+model_name = "second_model.pth"
 model_save_path = f"./models/{model_name}"
-lr = 1e-3
+lr = 1e-3  
 epochs = 50
-batch_size = 64
+batch_size = 128
 image_size = (1, 128, 128)
-model = MyModel(image_size).to(device)
+model = MyModel2(image_size).to(device)
 ds_train, ds_test = create_datasets(dataset_folder, image_size=image_size[1:], seed=42)
 dl_train, dl_test = DataLoader(ds_train, batch_size, shuffle=True), DataLoader(ds_test, batch_size, shuffle=False)
 optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
 loss = torchvision.ops.distance_box_iou_loss
 
+print("Device:", device)
+print(f"Total model parameters: {get_n_params(model):,}")
 train_error = []
 test_error = []
 for epoch in range(epochs):
@@ -104,6 +116,4 @@ plt.ylabel('Error')
 plt.grid(True)
 plt.legend()
 plt.show()
-
-
 
