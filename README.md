@@ -27,11 +27,11 @@ To run this project, you need to have Python 3 installed along with the followin
    ```
 
 ## Train
-```bash
-python3 ./src/train.py
-```
+   ```bash
+   python3 ./src/train.py
+   ```
 
 ## Test
-```bash
-python3 ./src/test.py
-```
+   ```bash
+   python3 ./src/test.py
+   ```
