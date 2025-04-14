@@ -68,8 +68,8 @@ class MyModel(nn.Module):
 
     def forward(self, x):
         x = self.gelu(self.x1(x))
-        x = self.gelu(self.b1(x))
         x = self.gelu(self.m1(x))
+        x = self.gelu(self.b1(x))
 
         x = self.gelu(self.x2(x))
         x = self.gelu(self.b2(x))
@@ -216,20 +216,20 @@ class MyModel3(nn.Module):
         
     def forward(self, x):
         x = self.gelu(self.x1(x))
-        x = self.gelu(self.m1(x))
-        x = self.gelu(self.b1(x))
+        x = self.m1(x)
+        x = self.b1(x)
 
         x = self.gelu(self.x2(x))
-        x = self.gelu(self.m2(x))
-        x = self.gelu(self.b2(x))
+        x = self.m2(x)
+        x = self.b2(x)
 
         x = self.gelu(self.x3(x))
-        x = self.gelu(self.m3(x))
-        x = self.gelu(self.b3(x))
+        x = self.m3(x)
+        x = self.b3(x)
 
         x = self.gelu(self.x4(x))
-        x = self.gelu(self.m4(x))
-        x = self.gelu(self.b4(x))
+        x = self.m4(x)
+        x = self.b4(x)
 
         x = self.flatten(x)
 

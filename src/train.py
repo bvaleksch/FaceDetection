@@ -69,11 +69,11 @@ def evaluate_epoch(epoch):
 
     return calculate_error(epoch, "Evaluating", dl_test, fn)
 
-night = True
+
 dataset_folder = "/Datasets/CelebA/"
 model_name = "third_model.pth"
 model_save_path = f"./models/{model_name}"
-lr = 1e-3  
+lr = 1e-6  
 epochs = 25
 batch_size = 128
 image_size = (1, 128, 128)
