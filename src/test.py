@@ -36,24 +36,33 @@ def draw_bounding_boxes(image, boxes, correct):
         cv2.rectangle(image, (int(x1*q1), int(y1*q2)), (int(x2*q1), int(y2*q2)), (0, 255, 0), 4)
     return image
 
+def get_coordinates(img):
+    img_cv = img.copy()
+    img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
+    img_resized, correct = resize_with_padding(img_cv, image_size[1:])
+    img_resized = img_resized.reshape(image_size)
+    img_tensor = torch.tensor(img_resized, dtype=torch.float32) / 255
+    img_tensor = img_tensor.unsqueeze(0).to(device)  
+
+    with torch.no_grad():
+        output = model(img_tensor)
+        boxes = (output.cpu().numpy() * 256).round()
+        boxes = boxes.reshape(-1, 4)
+
+    boxes = boxes[0]
+    boxes[2] += boxes[0]
+    boxes[3] += boxes[1]
+
+    return [boxes], correct
+
 def load_image():
     file_path = filedialog.askopenfilename()
     if file_path:
-        img_cv = cv2.imread(file_path)
-        img_org = img_cv.copy()
-        img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
+        img = cv2.imread(file_path)
 
-        img_resized, correct = resize_with_padding(img_cv, image_size[1:])
-        img_resized = img_resized.reshape(image_size)
-        img_tensor = (torch.tensor(img_resized, dtype=torch.float32) - 31.5) / 31.5
-        img_tensor = img_tensor.unsqueeze(0).to(device)  
+        box, correct = get_coordinates(img)
 
-        with torch.no_grad():
-            output = model(img_tensor)
-            boxes = output.cpu().numpy()
-            boxes = boxes.reshape(-1, 4)
-
-        img_with_boxes = draw_bounding_boxes(img_org, boxes, correct)
+        img_with_boxes = draw_bounding_boxes(img, box, correct)
 
         img_with_boxes, _ = resize_with_padding(img_with_boxes, (600, 600))
         img_with_boxes_pil = Image.fromarray(img_with_boxes)
@@ -65,29 +74,20 @@ def load_image():
 def start_video(absolute_coordinates=True, debug=True):
     cap = cv2.VideoCapture(0)
     while True:
-        _, img_cv = cap.read()
-        img_org = img_cv.copy()
-        img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
+        _, img = cap.read()
 
-        img_resized, correct = resize_with_padding(img_cv, image_size[1:], absolute_coordinates=absolute_coordinates)
-        img_resized = img_resized.reshape(image_size)
-        img_tensor = (torch.tensor(img_resized, dtype=torch.float32) - 31.5) / 31.5
-        img_tensor = img_tensor.unsqueeze(0).to(device)  
-
-        with torch.no_grad():
-            output = model(img_tensor)
-            boxes = output.cpu().numpy()
-            boxes = boxes.reshape(-1, 4)
+        box, correct = get_coordinates(img)
 
         if not debug:
-            img_with_boxes = draw_bounding_boxes(img_org, boxes, correct)
+            img_with_boxes = draw_bounding_boxes(img, box, correct)
             cv2.imshow("frame", img_with_boxes)
         else:
-            if not absolute_coordinates:
-                boxes *= 128
-            x1, y1, x2, y2 = boxes[0].round().astype(np.int32)
-            img_with_boxes = cv2.rectangle(img_resized[0], (x1, y1), (x2, y2), (63,), 2)
-            cv2.imshow("frame", img_with_boxes)
+            pass
+            # if not absolute_coordinates:
+            #     boxes *= 128
+            # x1, y1, x2, y2 = boxes[0].round().astype(np.int32)
+            # img_with_boxes = cv2.rectangle(img_resized[0], (x1, y1), (x2, y2), (63,), 2)
+            # cv2.imshow("frame", img_with_boxes)
 
         key_code = cv2.waitKey(1)
         if key_code & 0xFF == ord('q'):
@@ -103,7 +103,7 @@ def start_video(absolute_coordinates=True, debug=True):
 video_stream = True
 debug = False
 absolute_coordinates = True
-image_size = (1, 128, 128)
+image_size = (1, 256, 256)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = FirstModel(image_size).to(device)
 model.load_state_dict(torch.load("./models/first_model.pt", map_location=device))
