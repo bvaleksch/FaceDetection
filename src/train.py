@@ -69,22 +69,40 @@ def evaluate_epoch(epoch):
 
     return calculate_error(epoch, "Evaluating", dl_test, fn)
 
+def loss(output, target):
+    # Создаем новые тензоры для хранения измененных значений
+    output_boxes = output.clone()
+    target_boxes = target.clone()
+
+    # Преобразуем координаты (x1, y1, w, h) в (x1, y1, x2, y2)
+    output_boxes[:, 2] += output_boxes[:, 0]  # x2 = x1 + w
+    output_boxes[:, 3] += output_boxes[:, 1]  # y2 = y1 + h
+    target_boxes[:, 2] += target_boxes[:, 0]  # x2 = x1 + w
+    target_boxes[:, 3] += target_boxes[:, 1]  # y2 = y1 + h
+
+    # Вычисляем потери
+    return torchvision.ops.distance_box_iou_loss(output_boxes, target_boxes)
+
 
 dataset_folder = "/Datasets/CelebA/"
-model_name = "third_model.pth"
+model_name = "first_model.pt"
 model_save_path = f"./models/{model_name}"
-lr = 1e-6  
-epochs = 25
-batch_size = 128
-image_size = (1, 128, 128)
-model = MyModel3(image_size).to(device)
-ds_train, ds_test = create_datasets(dataset_folder, image_size=image_size[1:], seed=42)
+lr = 1e-4
+epochs = 50
+batch_size = 64
+image_size = (1, 256, 256)
+absolute_coordinates = False
+model = FirstModel(image_size).to(device)
+#model.load_state_dict(torch.load("./models/first_model.pt", map_location=device))
+ds_train, ds_test = create_datasets(dataset_folder, image_size=image_size[1:], absolute_coordinates=absolute_coordinates, seed=42)
+#ds_train.load()
+#ds_test.load()
 dl_train, dl_test = DataLoader(ds_train, batch_size, shuffle=True), DataLoader(ds_test, batch_size, shuffle=False)
 optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
-loss = torchvision.ops.distance_box_iou_loss
 
 print("Device:", device)
-print(f"Total model parameters: {get_n_params(model):,}")
+print("Absolute coordinates:", absolute_coordinates)
+print(f"Total number of parameters in the model: {get_n_params(model):,}")
 train_error = []
 test_error = []
 for epoch in range(epochs):
